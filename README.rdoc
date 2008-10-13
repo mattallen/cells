@@ -63,6 +63,19 @@ The "top page" would consist of the controller action's content, and two additio
 independent boxes with interesting content. These two boxes are <em>cells</em> and could
 be used on another page, too.
 
+= Caching
+
+Caching uses Rails 2's Rails.cache and is in the format of "cells:cell_name:state". It's suggested you use memcache and it'll fail gracefully without it. Caching is transparent to the end user.
+
+All states the the model a re-called via a standard after_save rails hook. A method called update_states is added to call ActiveRecord Models.
+
+You can explicitly expire methods on a cell by calling handing in either :all, and array of symbols that represent a method, or a single symbol that represents a method:
+
+CarCell.update_states                     # will update all the methods on the CarCell
+CarCell.update_states :holdens            # will update the 'holden' method on the CarCell
+CarCell.update_states [:holdens,:fords]   # will update the 'holden' and 'ford' method on the CarCell
+
+
 = Documentation
 
 Reference documentation is found in the documentation of the Cell::Base class.

@@ -11,7 +11,15 @@ module Cell
       return cell.render_state(state)
     end
   end
+  module ArMethods
+    def update_cells
+      begin
+        cell_name = (self.class.to_s + "Cell").constantize
+        cell_name.update_states
+      rescue NameError
+        # No cell for this model
+      end
+    end
+  end
 end
-
-
 

@@ -30,3 +30,8 @@ require 'action_view_extensions'
 ActionController::Base.class_eval do
   include Cell::ControllerMethods
 end
+
+ActiveRecord::Base.class_eval do
+  after_save :update_cells
+  include Cell::ArMethods
+end

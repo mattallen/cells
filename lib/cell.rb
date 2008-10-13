@@ -138,6 +138,7 @@ module Cell
   class Base
     attr_accessor :controller
     attr_accessor :state_name
+    attr_accessor :force_cache_update
     
     # Forgery protection for forms
     cattr_accessor :request_forgery_protection_token
@@ -146,10 +147,32 @@ module Cell
     
     
     def initialize(controller, cell_name=nil, options={})
-      @controller = controller
-      @cell_name  = cell_name ### TODO: currently we don't use this.
-      @opts       = options
+      @controller           = controller
+      @cell_name            = cell_name ### TODO: currently we don't use this.
+      @force_cache_update   = options[:force_cache_update] ||= false
+      @opts                 = options
       self.allow_forgery_protection = true
+    end
+    
+    # Model.update_states calls the methods in the model and forces a re-cache of them
+    # This happens by faking the controller leverl stuff
+    def self.update_states(update_methods = :all)
+      require 'action_controller/test_process'  
+      controller = ActionController::Base.new
+      controller.request = ActionController::TestRequest.new(:format => "html")
+      cell = Cell::Base.create_cell_for(controller, self.cell_name, {:force_cache_update => true})
+      if (update_methods == :all)
+        base = Cell::Base.new(controller, nil)
+        (cell.methods - base.methods).each do |m| # This is to find the methods on a concrete instance of Cell::Base
+          cell.send(m)
+        end
+      elsif update_methods.is_a?(Array) 
+        update_methods.each do |m|
+          cell.send(m)
+        end
+      else
+         cell.send(update_methods)
+      end
     end
 
     # Access the current controller's params hash. This is only to be used
@@ -180,7 +203,9 @@ module Cell
       content = send(state)
 
       if content.class == String
-        return content
+        return Rails.cache.fetch(["cells",cell_name,state].join(":"),:force => @force_cache_update) do
+          content
+        end
       end
 
       return self.render_view_for_state(state)
@@ -203,7 +228,9 @@ module Cell
       clone_ivars_to(action_view)
       
       begin
-        action_view.render_file("#{self.cell_name}/#{state}", true) # path that is passed to finder.path_and_extension
+        Rails.cache.fetch(["cells",cell_name,state].join(":"),:force => @force_cache_update) do
+          action_view.render_file("#{self.cell_name}/#{state}", true) # path that is passed to finder.path_and_extension
+        end
       rescue ActionView::MissingTemplate
         ### TODO: introduce error method.
         return "ATTENTION: cell view for #{cell_name}##{state} is not readable/existing.
