@@ -65,9 +65,9 @@ be used on another page, too.
 
 = Caching
 
-Caching uses Rails 2's Rails.cache and is in the format of "cells:cell_name:state". It's suggested you use memcache and it'll fail gracefully without it. Caching is transparent to the end user.
+Caching uses Rails 2's Rails.cache and stores it's key in the format of "cells:cell_name:state". It's suggested you use memcache and it'll fail gracefully without it. Caching is transparent to the end user.
 
-All states the the model a re-called via a standard after_save rails hook. A method called update_states is added to call ActiveRecord Models.
+All states the the model a re-called via a standard after_save rails hook. A method called update_states is added to all ActiveRecord models.
 
 You can explicitly expire methods on a cell by calling handing in either :all, and array of symbols that represent a method, or a single symbol that represents a method:
 
