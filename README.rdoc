@@ -71,9 +71,9 @@ All states the the model a re-called via a standard after_save rails hook. A met
 
 You can explicitly expire methods on a cell by calling handing in either :all, and array of symbols that represent a method, or a single symbol that represents a method:
 
-CarCell.update_states                     # will update all the methods on the CarCell
-CarCell.update_states :holdens            # will update the 'holden' method on the CarCell
-CarCell.update_states [:holdens,:fords]   # will update the 'holden' and 'ford' method on the CarCell
+  CarCell.update_states                     # will update all the methods on the CarCell
+  CarCell.update_states :holdens            # will update the 'holden' method on the CarCell
+  CarCell.update_states [:holdens,:fords]   # will update the 'holden' and 'ford' method on the CarCell
 
 
 = Documentation
